@@ -1,0 +1,148 @@
+package com.example.lab_2_task_2;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class MainActivity extends AppCompatActivity {
+    private TextView questionTextView, timerTextView, scoreTextView;
+    private Button trueButton, falseButton, startButton;
+    private RadioGroup modeRadioGroup;
+
+    // 10 українських письменників
+    private List<String> ukrainianWriters = Arrays.asList(
+            "Тарас Шевченко", "Іван Франко", "Леся Українка", "Микола Гоголь",
+            "Панас Мирний", "Олександр Довженко", "Василь Стус", "Григорій Сковорода",
+            "Юрій Андрухович", "Ірина Жиленко"
+    );
+
+    // 10 закордонних письменників
+    private List<String> foreignWriters = Arrays.asList(
+            "Вільям Шекспір", "Чарльз Діккенс", "Джейн Остін", "Ернест Хемінгуей",
+            "Франц Кафка", "Маргарет Етвуд", "Томас Манн", "Габріель Гарсія Маркес",
+            "Джордж Орвел", "Ремарк Еріх"
+    );
+
+    private List<String> allWriters = new ArrayList<>();
+    private Set<String> askedWriters = new HashSet<>();
+    private int scoreCorrect = 0, scoreIncorrect = 0;
+    private boolean isGameRunning = false;
+    private boolean allowRepeats = false;
+
+    private CountDownTimer timer;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        questionTextView = findViewById(R.id.questionTextView);
+        timerTextView = findViewById(R.id.timerTextView);
+        scoreTextView = findViewById(R.id.scoreTextView);
+        trueButton = findViewById(R.id.trueButton);
+        falseButton = findViewById(R.id.falseButton);
+        startButton = findViewById(R.id.startButton);
+        modeRadioGroup = findViewById(R.id.modeRadioGroup);
+
+        trueButton.setEnabled(false);
+        falseButton.setEnabled(false);
+
+        startButton.setOnClickListener(v -> startGame());
+
+        trueButton.setOnClickListener(v -> checkAnswer(true));
+        falseButton.setOnClickListener(v -> checkAnswer(false));
+    }
+
+    private void startGame() {
+        scoreCorrect = 0;
+        scoreIncorrect = 0;
+        allWriters.clear();
+        allWriters.addAll(ukrainianWriters);
+        allWriters.addAll(foreignWriters);
+        Collections.shuffle(allWriters);
+        askedWriters.clear();
+
+        // Вибір режиму
+        int selectedMode = modeRadioGroup.getCheckedRadioButtonId();
+        allowRepeats = selectedMode == R.id.repeatModeButton;
+
+        isGameRunning = true;
+        startButton.setEnabled(false);
+        trueButton.setEnabled(true);
+        falseButton.setEnabled(true);
+
+        nextQuestion();
+
+        timer = new CountDownTimer(60000, 1000) { // Таймер на 1 хвилину
+            public void onTick(long millisUntilFinished) {
+                timerTextView.setText("Час: " + millisUntilFinished / 1000 + "с");
+            }
+
+            public void onFinish() {
+                endGame();
+            }
+        }.start();
+    }
+
+    private void nextQuestion() {
+        if (!allowRepeats && askedWriters.size() >= allWriters.size()) {
+            // Якщо всі питання задані (в режимі без повторень), гра завершується
+            endGame();
+            return;
+        }
+
+        String writer;
+        if (allowRepeats) {
+            writer = allWriters.get((int) (Math.random() * allWriters.size())); // Випадковий вибір із повтореннями
+        } else {
+            do {
+                writer = allWriters.get((int) (Math.random() * allWriters.size())); // Без повторень
+            } while (askedWriters.contains(writer) && askedWriters.size() < allWriters.size());
+            askedWriters.add(writer);
+        }
+
+        questionTextView.setText(writer);
+    }
+
+    private void checkAnswer(boolean answer) {
+        String currentWriter = questionTextView.getText().toString();
+        boolean isUkrainianWriter = ukrainianWriters.contains(currentWriter);
+
+        if ((isUkrainianWriter && answer) || (!isUkrainianWriter && !answer)) {
+            scoreCorrect++;
+            Toast.makeText(this, "Правильно!", Toast.LENGTH_SHORT).show();
+        } else {
+            scoreIncorrect++;
+            Toast.makeText(this, "Неправильно!", Toast.LENGTH_SHORT).show();
+        }
+
+        nextQuestion();
+    }
+
+    private void endGame() {
+        isGameRunning = false;
+        startButton.setEnabled(true);
+        trueButton.setEnabled(false);
+        falseButton.setEnabled(false);
+
+        if (timer != null) {
+            timer.cancel();
+        }
+
+        timerTextView.setText("Час закінчився!");
+        scoreTextView.setText("Вірно: " + scoreCorrect + " Невірно: " + scoreIncorrect);
+    }
+}

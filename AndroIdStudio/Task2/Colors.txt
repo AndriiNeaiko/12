@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+<!-- Основні кольори -->
+    <color name="backgroundColor">#F5F5F5</color> <!-- Світлий фон -->
+    <color name="primaryTextColor">#212121</color> <!-- Темний текст -->
+    <color name="secondaryTextColor">#757575</color> <!-- Світло-сірий текст -->
+    <color name="buttonTextColor">#FFFFFF</color> <!-- Білий текст на кнопках -->
+    <color name="buttonColor">#00796B</color> <!-- Колір кнопок -->
+    <color name="accentColor">#FF4081</color> <!-- Акцентний колір для кнопки старту -->
+    <color name="cardBackground">#FFFFFF</color> <!-- Колір фону картки -->
+</resources>
